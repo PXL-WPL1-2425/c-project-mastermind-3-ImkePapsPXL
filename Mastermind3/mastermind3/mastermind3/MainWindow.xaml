@@ -1,0 +1,27 @@
+﻿<Window x:Class="WpfApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Mastermind" Height="750" Width="655" Background="LightGray" KeyDown="MainWindow_KeyDown" Closing="MainWindow_Closing">
+    <Grid Margin="0,0,0,-141">
+        <Menu>
+            <MenuItem Name="fileMenu" Header="Bestand">
+                <MenuItem Name="newGameMenu" Header="Nieuw spel" Click="newGameMenu_Click"/>
+                <MenuItem Name="highScoreMenu" Header="Highscores" Click="highScoreMenu_Click"/>
+                <MenuItem Name="closeGameMenu" Header="Sluit de applicatie" Click="closeGameMenu_Click"/>
+            </MenuItem>
+            <MenuItem Name="settingsMenu" Header="Instellingen">
+                <MenuItem Name="amoutOfAttemptsMenu" Header="Aantal pogingen" Click="amountOfAttemptsMenu_Click"/>
+            </MenuItem>
+        </Menu>
+        <Label Name="label1" Width="50" Height="50" Background="LightGray" BorderThickness="2" BorderBrush="Black" Margin="10,50,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseDown="Label_MouseDown"/>
+        <Label Name="label2" Width="50" Height="50" Background="LightGray" BorderThickness="2" BorderBrush="Black" Margin="65,50,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseDown="Label_MouseDown"/>
+        <Label Name="label3" Width="50" Height="50" Background="LightGray" BorderThickness="2" BorderBrush="Black" Margin="120,50,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseDown="Label_MouseDown"/>
+        <Label Name="label4" Width="50" Height="50" Background="LightGray" BorderThickness="2" BorderBrush="Black" Margin="175,50,0,0" HorizontalAlignment="Left" VerticalAlignment="Top" MouseDown="Label_MouseDown"/>
+        <Label Name="scoreLabel" Content="Score: 100" FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="409,60,0,0"/>
+        <Label Name="debugLabel" Content=" "  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="344,201,0,0" Width="316" Height="85"/>
+        <Label Name="timerLabel" Content=" " FontSize="16" FontWeight="Bold" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="290,128,0,0" Width="44"/>
+        <Button Name="checkButton" Content="Check code" Width="100" Height="30" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="262,60,0,0" Click="CheckButton_Click"/>
+
+        <StackPanel Name="attemptsPanel" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,173,0,0" Height="608" Width="329" />
+    </Grid>
+</Window>
