@@ -43,7 +43,7 @@ namespace WpfApp
         private int score = 100;
         private int attempts = 0;
         private int remainingAttempts = 10;
-        private List<(string playerName, int attempts, int score)> highScores = new List<(string playerName, int attempts, int score)>();
+        private List<(string currentPlayer, int attempts, int score)> highScores = new List<(string currentPlayer, int attempts, int score)>();
         private string playerName;
         private int currentPlayerIndex = 0;
         private List<string> playerNames = new List<string>();
@@ -60,9 +60,7 @@ namespace WpfApp
             InitializeComponent();
             labels = new WpfLabel[] { label1, label2, label3, label4 };
             GenerateTargetColors();
-            StartGame();
-            StartCountDown();
-            this.Title = $"{currentPlayer}";
+            StartGame();                       
         }
         private void GenerateTargetColors()
         {
@@ -83,34 +81,25 @@ namespace WpfApp
         {
             CheckCode();
             StartCountDown();
-            attempts++;
-            this.Title = $"{playerName}";
+            attempts++;             
         }
         private void NextPlayer()
         {
-            // Controleer of de lijst leeg is
             if (playerNames == null || playerNames.Count == 0)
             {
                 MessageBox.Show("Geen spelers meer in de lijst. Het spel wordt afgesloten.", "Fout", MessageBoxButton.OK, MessageBoxImage.Error);
                 Close();
                 return;
             }
+            playerNames.RemoveAt(0);
+            currentPlayer = playerNames[0];            
+            playerNames.Add(currentPlayer);
+            nextPlayer = playerNames.Count > 1 ? playerNames[0] : "Geen volgende speler";
 
-            currentPlayer = playerNames[0];
-
-            if (playerNames.Count > 1)
-            {
-                playerNames.RemoveAt(0); 
-                playerNames.Add(currentPlayer); 
-                nextPlayer = playerNames[0]; 
-            }
-            else
-            {
-                nextPlayer = "Geen volgende speler";
-            }
             //Debugging();
-            this.Title = $"Speler: {currentPlayer}'s beurt";
+            gameOver = false; 
             ResetGame();
+            WindowTitle();
         }
         private void Debugging()
         {
@@ -147,7 +136,6 @@ namespace WpfApp
                     match = false;
                 }
             }
-
             score -= totalPenalty;
             if (score < 0) score = 0;
 
@@ -155,34 +143,30 @@ namespace WpfApp
 
             if (match)
             {
-                gameOver = true; 
-                MessageBox.Show($"Code is gekraakt in {attempts} pogingen! Nu is het {nextPlayer} aan de beurt.",
-                                "Gefeliciteerd!", MessageBoxButton.OK, MessageBoxImage.Information);
+                gameOver = true;
+                MessageBox.Show($"Code is gekraakt in {attempts} pogingen! Nu is het {nextPlayer} aan de beurt.",$"{currentPlayer}", MessageBoxButton.OK, MessageBoxImage.Information);
                 NextPlayer();
                 timer.Stop();
                 UpdateHighScores(score);
+                return;
             }
-            else if (remainingAttempts <= 0 || score <= 0)
+            if (remainingAttempts <= 0 || score <= 0)
             {
-                gameOver = true; 
-                MessageBox.Show($"De code was {colorCode}. Nu is het {nextPlayer} aan de beurt.",
-                                "Helaas!", MessageBoxButton.OK, MessageBoxImage.Information);
+                gameOver = true;
+                MessageBox.Show($"De code was {colorCode}. Nu is het {nextPlayer} aan de beurt.", $"{currentPlayer}", MessageBoxButton.OK, MessageBoxImage.Information);
                 timer.Stop();
                 UpdateHighScores(score);
                 NextPlayer();
-            }
-            else
-            {
-                remainingAttempts--;
-                UpdateHighScores(score);
-            }
-
+                return;
+            }           
+            remainingAttempts--;
+            UpdateHighScores(score);            
             scoreLabel.Content = $"Score: {score}";
+            WindowTitle();
         }
-
         private void UpdateHighScores(int newScore)
         {
-            highScores.Add((playerName, attempts, score));
+            highScores.Add((currentPlayer, attempts, score));
             highScores = highScores.OrderByDescending(x => x.score).Take(15).ToList();
             if (highScores.Count > 15)
             {
@@ -258,13 +242,12 @@ namespace WpfApp
             {
                 StopCountDown();
                 attempts++;
-                this.Title = $"{playerName}";
                 StartCountDown();
                 if (attempts >= remainingAttempts)
                 {
                     timer.Stop();
                     string colorCode = string.Join(", ", targetColors.Select(color => colorName[color]));
-                    MessageBox.Show($"Geen pogingen meer. De code was {colorCode}.", "FAILED", MessageBoxButton.OK, MessageBoxImage.Information);
+                    MessageBox.Show($"Geen pogingen meer. De code was {colorCode}. De volgende speler is {nextPlayer}", $"{currentPlayer}", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
         }
@@ -310,11 +293,12 @@ namespace WpfApp
                 if (answer == MessageBoxResult.No)
                 {
                     break;
-                }
-                currentPlayer = playerNames[0];
-                nextPlayer = playerNames.Count > 1 ? playerNames[1] : "Geen volgende speler";
-                StartCountDown();
+                }                
             }
+            currentPlayer = playerNames[0];
+            nextPlayer = playerNames.Count > 1 ? playerNames[1] : "Geen volgende speler";
+            StartCountDown();
+            WindowTitle();            
         }
         private void ResetGame()
         {
@@ -326,13 +310,16 @@ namespace WpfApp
             scoreLabel.Content = 100;
 
             GenerateTargetColors();
-            
-            this.Title = $"Speler: {currentPlayer}'s beurt";       
-                
+            WindowTitle();
+
             label1.Background = Brushes.White;
             label2.Background = Brushes.White;
             label3.Background = Brushes.White;
             label4.Background = Brushes.White;
+        }
+        private void WindowTitle()
+        {
+            this.Title = $"{currentPlayer}";
         }
         private void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -350,7 +337,7 @@ namespace WpfApp
         }
         private void highScoreMenu_Click(object sender, RoutedEventArgs e)
         {
-            string highscoreEntry = string.Join("\n", highScores.Select((entry, index) => $"{entry.playerName} - {entry.attempts} pogingen - {entry.score}/100"));
+            string highscoreEntry = string.Join("\n", highScores.Select((entry, index) => $"{entry.currentPlayer} - {entry.attempts} pogingen - {entry.score}/100"));
 
             MessageBox.Show(string.IsNullOrEmpty(highscoreEntry) ? "Nog geen highscores!" : highscoreEntry,
             "Mastermind highscores", MessageBoxButton.OK, MessageBoxImage.Information);
