@@ -50,6 +50,8 @@ namespace WpfApp
         bool match = true;
         private string currentPlayer = string.Empty; 
         private string nextPlayer = string.Empty;
+        private int index;
+        Random rand = new Random();
 
         DispatcherTimer timer = new DispatcherTimer();
         TimeSpan elapsedTime;
@@ -63,8 +65,7 @@ namespace WpfApp
             StartGame();                       
         }
         private void GenerateTargetColors()
-        {
-            Random rand = new Random();
+        {            
             for (int i = 0; i < targetColors.Length; i++)
             {
                 targetColors[i] = predefinedColors[rand.Next(predefinedColors.Length)];
@@ -181,44 +182,32 @@ namespace WpfApp
                 Margin = new Thickness(5)
             };
 
-            foreach (var label in labels)
+            for (int i = 0; i < labels.Length; i++)
             {
                 WpfLabel colorLabel = new WpfLabel
                 {
                     Width = 30,
                     Height = 30,
-                    Background = label.Background,
-                    BorderThickness = new Thickness(1),
-                    BorderBrush = Brushes.Black,
+                    Background = labels[i].Background,
+                    BorderThickness = new Thickness(4),
                     Margin = new Thickness(2)
                 };
+                if (labels[i].Background == targetColors[i]) 
+                {
+                    colorLabel.BorderBrush = Brushes.DarkRed;
+                    colorLabel.ToolTip = "Juiste kleur, juiste positie";
+                }
+                else if (targetColors.Contains(labels[i].Background))
+                {
+                    colorLabel.BorderBrush = Brushes.Wheat;
+                    colorLabel.ToolTip = "Juiste kleur, foute positie";
+                }
+                else 
+                {
+                    colorLabel.BorderBrush = Brushes.Black;                    
+                    colorLabel.ToolTip = "Foute kleur";
+                }
                 attemptPanel.Children.Add(colorLabel);
-            }
-            for (int i = 0; i < correctPositions; i++)
-            {
-                WpfLabel feedbackLabel = new WpfLabel
-                {
-                    Width = 20,
-                    Height = 20,
-                    Background = Brushes.Red,
-                    Margin = new Thickness(2),
-                    BorderBrush = Brushes.Black,
-                    BorderThickness = new Thickness(2)
-                };
-                attemptPanel.Children.Add(feedbackLabel);
-            }
-            for (int i = 0; i < correctColors; i++)
-            {
-                WpfLabel feedbackLabel = new WpfLabel
-                {
-                    Width = 20,
-                    Height = 20,
-                    Background = Brushes.White,
-                    Margin = new Thickness(2),
-                    BorderBrush = Brushes.Black,
-                    BorderThickness = new Thickness(2)
-                };
-                attemptPanel.Children.Add(feedbackLabel);
             }
             attemptsPanel.Children.Add(attemptPanel);
         }
@@ -357,7 +346,48 @@ namespace WpfApp
                 MessageBox.Show("Voer een geldig aantal pogingen in tussen 3 en 20.", "Foutieve invoer", MessageBoxButton.OKCancel, MessageBoxImage.Warning);
             }
         }
+        private void hintButton_Click(object sender, RoutedEventArgs e)
+        {
+            Random rand = new Random();
+            int index;
+            if (score <=15)
+            {
+                MessageBox.Show("Je hebt niet genoeg punten om een hint te kopen.", "Onvoldoende punten", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+            MessageBoxResult result = MessageBox.Show(
+                "Wil je een hint voor een juiste kleur (15 punten) of een juiste kleur op de juiste plaats (25 punten)?\n\n" +
+                "Klik op Ja voor een juiste kleur.\n" +
+                "Klik op Nee voor een juiste kleur op de juiste plaats.",
+                "Hint kopen", MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+
+            if (result == MessageBoxResult.Yes)
+            {
+                if (score >= 15)
+                {
+                    index = rand.Next(targetColors.Length);
+                    MessageBox.Show($"Een juiste kleur is: {colorName[targetColors[index]]}", "Hint", MessageBoxButton.OK, MessageBoxImage.Information);
+                    score -= 15;
+                }                
+            }
+            else if (result == MessageBoxResult.No)
+            {
+                if (score >= 25)
+                {                    
+                    do
+                    {
+                        index = rand.Next(targetColors.Length);
+                    } while (labels[index].Background == targetColors[index]);
+                    labels[index].Background = targetColors[index];
+                    
+                    score -= 25;
+                }
+                else
+                {
+                    MessageBox.Show("Je hebt niet genoeg punten om deze hint te kopen.", "Onvoldoende punten", MessageBoxButton.OK, MessageBoxImage.Warning);
+                }
+            }
+            scoreLabel.Content = $"Score: {score}";
+        }
     }
-
-
 }
