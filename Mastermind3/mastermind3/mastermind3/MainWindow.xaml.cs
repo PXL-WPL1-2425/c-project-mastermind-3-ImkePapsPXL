@@ -195,17 +195,17 @@ namespace WpfApp
                 if (labels[i].Background == targetColors[i]) 
                 {
                     colorLabel.BorderBrush = Brushes.DarkRed;
-                    colorLabel.ToolTip = "Juiste kleur, juiste positie";
+                    //colorLabel.ToolTip = "Juiste kleur, juiste positie";
                 }
                 else if (targetColors.Contains(labels[i].Background))
                 {
                     colorLabel.BorderBrush = Brushes.Wheat;
-                    colorLabel.ToolTip = "Juiste kleur, foute positie";
+                    //colorLabel.ToolTip = "Juiste kleur, foute positie";
                 }
                 else 
                 {
                     colorLabel.BorderBrush = Brushes.Black;                    
-                    colorLabel.ToolTip = "Foute kleur";
+                    //colorLabel.ToolTip = "Foute kleur";
                 }
                 attemptPanel.Children.Add(colorLabel);
             }
